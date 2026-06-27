@@ -145,49 +145,29 @@ public class Level {
 	}
 
 
-	public ArrayList<AABB> getCubes(AABB aABB) {
-		ArrayList aABBs = new ArrayList();
-		int x0 = (int)aABB.x0;
-		int x1 = (int)(aABB.x1 + 1.0F);
-		int y0 = (int)aABB.y0;
-		int y1 = (int)(aABB.y1 + 1.0F);
-		int z0 = (int)aABB.z0;
-		int z1 = (int)(aABB.z1 + 1.0F);
-		if(x0 < 0) {
-			x0 = 0;
-		}
-
-		if(y0 < 0) {
-			y0 = 0;
-		}
-
-		if(z0 < 0) {
-			z0 = 0;
-		}
-
-		if(x1 > this.width) {
-			x1 = this.width;
-		}
-
-		if(y1 > this.depth) {
-			y1 = this.depth;
-		}
-
-		if(z1 > this.height) {
-			z1 = this.height;
-		}
-
-		for(int x = x0; x < x1; ++x) {
-			for(int y = y0; y < y1; ++y) {
-				for(int z = z0; z < z1; ++z) {
-					if(this.isSolidTile(x, y, z)) {
-						aABBs.add(new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1)));
-					}
+	public ArrayList<AABB> getCubes(AABB boundingBox) {
+		ArrayList<AABB> boundingBoxList = new ArrayList<>();
+		int minX = (int) (Math.floor(boundingBox.minX) - 1.0D);
+		int maxX = (int) (Math.ceil(boundingBox.maxX) + 1.0D);
+		int minY = (int) (Math.floor(boundingBox.minY) - 1.0D);
+		int maxY = (int) (Math.ceil(boundingBox.maxY) + 1.0D);
+		int minZ = (int) (Math.floor(boundingBox.minZ) - 1.0D);
+		int maxZ = (int) (Math.ceil(boundingBox.maxZ) + 1.0D);
+		minX = Math.max(0, minX);
+		minY = Math.max(0, minY);
+		minZ = Math.max(0, minZ);
+		maxX = Math.min(this.width, maxX);
+		maxY = Math.min(this.depth, maxY);
+		maxZ = Math.min(this.height, maxZ);
+		for (int x = minX; x < maxX; x++) {
+			for (int y = minY; y < maxY; y++) {
+				for (int z = minZ; z < maxZ; z++) {
+					if (isSolidTile(x, y, z))
+						boundingBoxList.add(new AABB(x, y, z, (x + 1), (y + 1), (z + 1)));
 				}
 			}
 		}
-
-		return aABBs;
+		return boundingBoxList;
 	}
 
 	public float getBrightness(int x, int y, int z) {
@@ -198,6 +178,7 @@ public class Level {
 
 	public void setTile(int x, int y, int z, int type) {
 		if(x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.depth && z < this.height) {
+			if (type > 1) type = 1;
 			this.blocks[(y * this.height + z) * this.width + x] = (byte)type;
 			this.calcLightDepths(x, z, 1, 1);
 

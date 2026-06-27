@@ -2,153 +2,136 @@ package com.mojang.rubydung;
 
 import com.mojang.rubydung.level.Level;
 import com.mojang.rubydung.phys.AABB;
-import java.util.ArrayList;
+import java.util.List;
 import org.lwjgl.input.Keyboard;
 
 public class Player {
-	private Level level;
-	public float xo;
-	public float yo;
-	public float zo;
-	public float x;
-	public float y;
-	public float z;
-	public float xd;
-	public float yd;
-	public float zd;
-	public float yRot;
-	public float xRot;
-	public AABB bb;
-	public boolean onGround = false;
-
-	public Player(Level level) {
-		this.level = level;
-		this.resetPos();
-	}
-
-	public void resetPos() {
-		float x = (float)Math.random() * (float)this.level.width;
-		float y = (float)(this.level.depth + 10);
-		float z = (float)Math.random() * (float)this.level.height;
-		this.setPos(x, y, z);
-	}
-
-	private void setPos(float x, float y, float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		float w = 0.3F;
-		float h = 0.9F;
-		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
-	}
-
-	public void turn(float xo, float yo) {
-		this.yRot = (float)((double)this.yRot + (double)xo * 0.15D);
-		this.xRot = (float)((double)this.xRot - (double)yo * 0.15D);
-		if(this.xRot < -90.0F) {
-			this.xRot = -90.0F;
-		}
-
-		if(this.xRot > 90.0F) {
-			this.xRot = 90.0F;
-		}
-
-	}
-
-	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
-		float xa = 0.0F;
-		float ya = 0.0F;
-		if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			this.resetPos();
-		}
-		if(Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			--ya;
-		}
-
-		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			++ya;
-		}
-
-		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			--xa;
-		}
-
-		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) || Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			++xa;
-		}
-
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && this.onGround) {
-			this.yd = 0.12F;
-		}
-
-		this.moveRelative(xa, ya, this.onGround ? 0.02F : 0.005F);
-		this.yd = (float)((double)this.yd - 0.005D);
-		this.move(this.xd, this.yd, this.zd);
-		this.xd *= 0.91F;
-		this.yd *= 0.98F;
-		this.zd *= 0.91F;
-		if(this.onGround) {
-			this.xd *= 0.8F;
-			this.zd *= 0.8F;
-		}
-
-	}
-
-	public void move(float xa, float ya, float za) {
-		float xaOrg = xa;
-		float yaOrg = ya;
-		float zaOrg = za;
-		ArrayList aABBs = this.level.getCubes(this.bb.expand(xa, ya, za));
-
-		int i;
-		for(i = 0; i < aABBs.size(); ++i) {
-			ya = ((AABB)aABBs.get(i)).clipYCollide(this.bb, ya);
-		}
-
-		this.bb.move(0.0F, ya, 0.0F);
-
-		for(i = 0; i < aABBs.size(); ++i) {
-			xa = ((AABB)aABBs.get(i)).clipXCollide(this.bb, xa);
-		}
-
-		this.bb.move(xa, 0.0F, 0.0F);
-
-		for(i = 0; i < aABBs.size(); ++i) {
-			za = ((AABB)aABBs.get(i)).clipZCollide(this.bb, za);
-		}
-
-		this.bb.move(0.0F, 0.0F, za);
-		this.onGround = yaOrg != ya && yaOrg < 0.0F;
-		if(xaOrg != xa) {
-			this.xd = 0.0F;
-		}
-
-		if(yaOrg != ya) {
-			this.yd = 0.0F;
-		}
-
-		if(zaOrg != za) {
-			this.zd = 0.0F;
-		}
-
-		this.x = (this.bb.x0 + this.bb.x1) / 2.0F;
-		this.y = this.bb.y0 + 1.62F;
-		this.z = (this.bb.z0 + this.bb.z1) / 2.0F;
-	}
-
-	public void moveRelative(float xa, float za, float speed) {
-		float dist = xa * xa + za * za;
-		if(dist >= 0.01F) {
-			dist = speed / (float)Math.sqrt((double)dist);
-			xa *= dist;
-			za *= dist;
-			float sin = (float)Math.sin((double)this.yRot * Math.PI / 180.0D);
-			float cos = (float)Math.cos((double)this.yRot * Math.PI / 180.0D);
-			this.xd += xa * cos - za * sin;
-			this.zd += za * cos + xa * sin;
-		}
-	}
+  private final Level level;
+  
+  public double x;
+  
+  public double y;
+  
+  public double z;
+  
+  public double prevX;
+  
+  public double prevY;
+  
+  public double prevZ;
+  
+  public double motionX;
+  
+  public double motionY;
+  
+  public double motionZ;
+  
+  public float xRotation;
+  
+  public float yRotation;
+  
+  private boolean onGround;
+  
+  public AABB boundingBox;
+  
+  public Player(Level level) {
+    this.level = level;
+    resetPosition();
+  }
+  
+  private void setPosition(float x, float y, float z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    float width = 0.3F;
+    float height = 0.9F;
+    this.boundingBox = new AABB((x - width), (y - height), (z - width), (x + width), (y + height), (z + width));
+  }
+  
+  void resetPosition() {
+    float x = (float)Math.random() * this.level.width;
+    float y = (this.level.depth + 3);
+    float z = (float)Math.random() * this.level.height;
+    setPosition(x, y, z);
+  }
+  
+  public void turn(float x, float y) {
+    this.yRotation += x * 0.15F;
+    this.xRotation -= y * 0.15F;
+    this.xRotation = Math.max(-90.0F, this.xRotation);
+    this.xRotation = Math.min(90.0F, this.xRotation);
+  }
+  
+  public void tick() {
+    this.prevX = this.x;
+    this.prevY = this.y;
+    this.prevZ = this.z;
+    float forward = 0.0F;
+    float vertical = 0.0F;
+    if (Keyboard.isKeyDown(19))
+      resetPosition(); 
+    if (Keyboard.isKeyDown(200) || Keyboard.isKeyDown(17))
+      forward--; 
+    if (Keyboard.isKeyDown(208) || Keyboard.isKeyDown(31))
+      forward++; 
+    if (Keyboard.isKeyDown(203) || Keyboard.isKeyDown(30))
+      vertical--; 
+    if (Keyboard.isKeyDown(205) || Keyboard.isKeyDown(32))
+      vertical++; 
+    if ((Keyboard.isKeyDown(57)) && this.onGround)
+      this.motionY = 0.11999999731779099D; 
+    boolean isSprinting = Keyboard.isKeyDown(42);
+    float speedMultiplier = isSprinting ? 1.8F : 1.0F;
+    moveRelative(vertical, forward, (this.onGround ? 0.02F : 0.005F) * speedMultiplier);
+    this.motionY -= 0.005D;
+    move(this.motionX, this.motionY, this.motionZ);
+    float friction = isSprinting ? 0.95F : 0.91F;
+    this.motionX *= friction;
+    this.motionY *= 0.9800000190734863D;
+    this.motionZ *= friction;
+    if (this.onGround) {
+      float groundFriction = isSprinting ? 0.85F : 0.8F;
+      this.motionX *= groundFriction;
+      this.motionZ *= groundFriction;
+    } 
+  }
+  
+  public void move(double x, double y, double z) {
+    double prevX = x;
+    double prevY = y;
+    double prevZ = z;
+    List<AABB> aABBs = this.level.getCubes(this.boundingBox.expand(x, y, z));
+    for (AABB abb : aABBs)
+      y = abb.clipYCollide(this.boundingBox, y); 
+    this.boundingBox.move(0.0D, y, 0.0D);
+    for (AABB aABB : aABBs)
+      x = aABB.clipXCollide(this.boundingBox, x); 
+    this.boundingBox.move(x, 0.0D, 0.0D);
+    for (AABB aABB : aABBs)
+      z = aABB.clipZCollide(this.boundingBox, z); 
+    this.boundingBox.move(0.0D, 0.0D, z);
+    this.onGround = (prevY != y && prevY < 0.0D);
+    if (prevX != x)
+      this.motionX = 0.0D; 
+    if (prevY != y)
+      this.motionY = 0.0D; 
+    if (prevZ != z)
+      this.motionZ = 0.0D; 
+    this.x = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
+    this.y = this.boundingBox.minY + 1.62D;
+    this.z = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
+  }
+  
+  private void moveRelative(float x, float z, float speed) {
+    float distance = x * x + z * z;
+    if (distance < 0.01F)
+      return; 
+    distance = speed / (float)Math.sqrt(distance);
+    x *= distance;
+    z *= distance;
+    double sin = Math.sin(Math.toRadians(this.yRotation));
+    double cos = Math.cos(Math.toRadians(this.yRotation));
+    this.motionX += x * cos - z * sin;
+    this.motionZ += z * cos + x * sin;
+  }
 }

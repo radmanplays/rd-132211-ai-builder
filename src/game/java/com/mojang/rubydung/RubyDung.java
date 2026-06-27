@@ -1,5 +1,6 @@
 package com.mojang.rubydung;
 
+import com.mojang.rubydung.character.Enemy;
 import com.mojang.rubydung.level.Chunk;
 import com.mojang.rubydung.level.Level;
 import com.mojang.rubydung.level.LevelRenderer;
@@ -30,6 +31,7 @@ public class RubyDung implements Runnable {
 	private Level level;
 	private LevelRenderer levelRenderer;
 	private Player player;
+	private Enemy[] aiBuilders;
 	private IntBuffer viewportBuffer = GLAllocation.createIntBuffer(16);
 	private IntBuffer selectBuffer = GLAllocation.createIntBuffer(2000);
 	private HitResult hitResult = null;
@@ -55,6 +57,17 @@ public class RubyDung implements Runnable {
 		this.level = new Level(256, 256, 64);
 		this.levelRenderer = new LevelRenderer(this.level);
 		this.player = new Player(this.level);
+	    this.aiBuilders = new Enemy[1];
+	    double x = this.player.x + (Math.random() - 0.5D) * 10.0D;
+	    double z = this.player.z + (Math.random() - 0.5D) * 10.0D;
+	    this.aiBuilders[0] = new Enemy(this.level, x, (this.level.depth + 5), z);
+	    this.aiBuilders[0].enableAIBuilder();
+	    DebugLogger.controls("AI Builder spawned: 1 enemy with building AI near player");
+	    DebugLogger.controls("=== CONTROLS ===");
+	    DebugLogger.controls("Enter - Save level");
+	    DebugLogger.controls("Left Click - Place block");
+	    DebugLogger.controls("Right Click - Remove block");
+	    DebugLogger.controls("===============");
 		Mouse.setGrabbed(true);
 	}
 	
@@ -122,16 +135,20 @@ public class RubyDung implements Runnable {
 
 	public void tick() {
 		this.player.tick();
+	    for (Enemy builder : this.aiBuilders) {
+	        if (builder != null)
+	          builder.tick(); 
+	    }
 		levelSave();
 	}
 
 	private void moveCameraToPlayer(float a) {
 		GL11.glTranslatef(0.0F, 0.0F, -0.3F);
-		GL11.glRotatef(this.player.xRot, 1.0F, 0.0F, 0.0F);
-		GL11.glRotatef(this.player.yRot, 0.0F, 1.0F, 0.0F);
-		float x = this.player.xo + (this.player.x - this.player.xo) * a;
-		float y = this.player.yo + (this.player.y - this.player.yo) * a;
-		float z = this.player.zo + (this.player.z - this.player.zo) * a;
+		GL11.glRotatef(this.player.xRotation, 1.0F, 0.0F, 0.0F);
+		GL11.glRotatef(this.player.yRotation, 0.0F, 1.0F, 0.0F);
+		float x = (float) (this.player.prevX + (this.player.x - this.player.prevX) * a);
+		float y = (float) (this.player.prevY + (this.player.y - this.player.prevY) * a);
+		float z = (float) (this.player.prevZ + (this.player.z - this.player.prevZ) * a);
 		GL11.glTranslatef(-x, -y, -z);
 	}
 
@@ -154,8 +171,8 @@ public class RubyDung implements Runnable {
 	    double py = player.y;
 	    double pz = player.z;
 
-	    float yaw = (float) Math.toRadians(player.yRot);
-	    float pitch = (float) Math.toRadians(player.xRot);
+	    float yaw = (float) Math.toRadians(player.yRotation);
+	    float pitch = (float) Math.toRadians(player.xRotation);
 
 	    double dx = Math.sin(yaw) * Math.cos(pitch);
 	    double dy = -Math.sin(pitch);
@@ -265,7 +282,7 @@ public class RubyDung implements Runnable {
 			}
 			if(Keyboard.getEventKey() == Keyboard.KEY_BACK && Keyboard.getEventKeyState()) {
 				this.level.reset();
-				this.player.resetPos();
+				this.player.resetPosition();
 			}
 		}
 
@@ -286,6 +303,12 @@ public class RubyDung implements Runnable {
 		this.levelRenderer.render(this.player, 0);
 		GL11.glEnable(GL11.GL_FOG);
 		this.levelRenderer.render(this.player, 1);
+	    GL11.glDisable(2912);
+	    GL11.glEnable(3553);
+	    for (Enemy builder : this.aiBuilders) {
+	      if (builder != null)
+	        builder.render(a); 
+	    } 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		if(this.hitResult != null) {
 			this.levelRenderer.renderHit(this.hitResult);

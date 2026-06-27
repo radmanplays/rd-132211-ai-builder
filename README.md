@@ -1,6 +1,7 @@
-# rd-132211 [![Build and Upload JS + WASM](https://github.com/radmanplays/rd-132211/actions/workflows/build.yml/badge.svg)](https://github.com/radmanplays/rd-132211/actions/workflows/build.yml)
-<img width="800" height="600" alt="Pre-Classic_rd-132211" src="https://github.com/user-attachments/assets/2443d2ed-35ef-407b-972a-6cc61cc1465f" />
+# rd-132211-ai-builder ai builer mod[![Build and Upload JS + WASM](https://github.com/radmanplays/rd-132211-ai-builder/actions/workflows/build.yml/badge.svg)](https://github.com/radmanplays/rd-132211-ai-builder/actions/workflows/build.yml)
+<img width="800" height="600" alt="Pre-Classic_rd-132211-ai-builder" src="https://github.com/user-attachments/assets/2443d2ed-35ef-407b-972a-6cc61cc1465f" />
 
+### all credits to the original mod goes to: [https://modrinth.com/mod/ai-boykisser-builder-for-rd-132211](https://modrinth.com/mod/ai-boykisser-builder-for-rd-132211)
 
 ## requires java 17 to compile!
 ### (versions newer or older than 17 wont work)

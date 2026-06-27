@@ -9,7 +9,12 @@ import net.lax1dude.eaglercraft.opengl.RealOpenGLEnums;
 
 import static net.lax1dude.eaglercraft.opengl.EaglercraftGPU.*;
 
+import com.mojang.rubydung.level.Tesselator;
+
 public class GL11 extends RealOpenGLEnums {
+	
+    private static final Tesselator tess = Tesselator.instance;
+    private static int currentMode = -1;
 
 	public static void glEnable(int p1) {
 		switch (p1) {
@@ -112,6 +117,32 @@ public class GL11 extends RealOpenGLEnums {
 			break;
 		}
 	}
+	
+    public static void glBegin(int mode) {
+        currentMode = mode;
+        tess.init(mode);
+    }
+
+    public static void glEnd() {
+        tess.flush();
+        currentMode = -1;
+    }
+
+    public static void glVertex3f(float x, float y, float z) {
+        tess.vertex(x, y, z);
+    }
+
+    public static void glVertex3d(double x, double y, double z) {
+        tess.vertex(x, y, z);
+    }
+
+    public static void glTexCoord2f(float u, float v) {
+        tess.tex(u, v);
+    }
+    
+    public static void glTranslate3d(double x, double y, double z) {
+        tess.setTranslationD(x, y, z);
+    }
 
 	public static void glShadeModel(int i) {
 		shadeModel(i);

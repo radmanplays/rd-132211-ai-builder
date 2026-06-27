@@ -166,7 +166,7 @@ public class Frustum {
 		return true;
 	}
 
-	public boolean cubeInFrustum(AABB aabb) {
-		return this.cubeInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1);
-	}
+	 public boolean cubeInFrustum(AABB aabb) {
+		 return cubeInFrustum((float)aabb.minX, (float)aabb.minY, (float)aabb.minZ, (float)aabb.maxX, (float)aabb.maxY, (float)aabb.maxZ);
+	 }
 }
