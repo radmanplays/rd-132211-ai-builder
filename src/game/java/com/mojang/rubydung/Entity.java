@@ -228,6 +228,8 @@ public abstract class Entity {
   
   private AIManager aiManager;
   
+  java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
+  
   public Entity(Level level) {
     this.level = level;
     this.mapWidth = level.width;
@@ -603,7 +605,7 @@ public abstract class Entity {
     } 
     this.artPiecesCreated++;
     this.moodValue = Math.min(1.0F, this.moodValue + 0.05F);
-    DebugLogger.ai("AI created a small art piece! Mood: " + String.format("%.2f", new Object[] { Float.valueOf(this.moodValue) }));
+    DebugLogger.ai("AI created a small art piece! Mood: " + df.format(this.moodValue));
     forceChunkUpdate();
   }
   
@@ -1089,7 +1091,7 @@ public abstract class Entity {
       best = Goal.REPAIR;
     } 
     this.currentGoal = best;
-    System.out.println("AI decided to: " + best + " (score: " + String.format("%.2f", new Object[] { Double.valueOf(bestScore) }) + ") mood: " + String.format("%.2f", new Object[] { Float.valueOf(this.moodValue) }) + " creativity: " + this.creativityLevel);
+    System.out.println("AI decided to: " + best + " (score: " + df.format(bestScore) + ") mood: " + df.format(this.moodValue) + " creativity: " + this.creativityLevel);
     if (best == Goal.BUILD) {
       planNewBuildChain();
     } else if (best == Goal.CONNECT) {
@@ -1123,7 +1125,7 @@ public abstract class Entity {
         this.currentEmotion = Emotion.CREATIVE;
         this.isCreativeMode = true;
         this.moodValue = Math.min(1.0F, this.moodValue + 0.1F);
-        System.out.println("AI is creating art! Type: " + artType + " Mood: " + String.format("%.2f", new Object[] { Float.valueOf(this.moodValue) }));
+        System.out.println("AI is creating art! Type: " + artType + " Mood: " + df.format(this.moodValue));
         return;
       } 
     } 
@@ -2210,11 +2212,7 @@ public abstract class Entity {
   public String getAIStatus() {
     if (!this.isAIBuilder)
       return "Not an AI Builder"; 
-    return String.format("Level %d | Mood %.2f | Creativity %d | Art %d | Experiments %d | %s", new Object[] { Integer.valueOf(this.builderLevel), 
-          Float.valueOf(this.moodValue), 
-          Integer.valueOf(this.creativityLevel), 
-          Integer.valueOf(this.artPiecesCreated), 
-          Integer.valueOf(this.experimentCount), this.currentEmotion });
+    return "Level " + this.builderLevel + " | Mood " + df.format(this.moodValue) + " | Creativity " + this.creativityLevel + " | Art " + this.artPiecesCreated + " | Experiments " + this.experimentCount + " | " + this.currentEmotion;
   }
   
   private void updateMapMemory() {
@@ -2429,10 +2427,7 @@ public abstract class Entity {
       this.personalityTraits[0] = random.nextFloat();
       this.personalityTraits[1] = random.nextFloat();
       this.personalityTraits[2] = random.nextFloat();
-      System.out.println("AI changed personality traits: creativity=" + 
-          String.format("%.2f", new Object[] { Float.valueOf(this.personalityTraits[0]) }) + ", efficiency=" + 
-          String.format("%.2f", new Object[] { Float.valueOf(this.personalityTraits[1]) }) + ", aesthetics=" + 
-          String.format("%.2f", new Object[] { Float.valueOf(this.personalityTraits[2]) }));
+      System.out.println("AI changed personality traits: creativity=" + df.format(this.personalityTraits[0]) + ", efficiency=" + df.format(this.personalityTraits[1]) + ", aesthetics=" + df.format(this.personalityTraits[2]));
     } 
     this.moodValue = Math.max(0.3F, Math.min(0.8F, this.moodValue + (random.nextFloat() - 0.5F) * 0.2F));
   }
